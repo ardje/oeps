@@ -1,0 +1,13 @@
+#!/bin/sh
+echo "Content-Type: text/plain"
+echo 
+touch /var/run/apping.stamp
+/sbin/wifi down &> /dev/null
+sleep 1
+/sbin/wifi up &> /dev/null
+if (ip li sh dev wlan0 &> /dev/null || ! test -s /var/run/hostapd-phy0.cfg ) && ( ip li sh dev wlan1 &> /dev/null || ! test -s /var/run/hostapd-phy1.cfg)
+then
+	echo "WIFI UP"
+else
+	echo "WIFI FAILED"
+fi

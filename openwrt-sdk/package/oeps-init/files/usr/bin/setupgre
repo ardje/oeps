@@ -1,0 +1,42 @@
+#!/bin/sh
+echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
+ebtables -F FORWARD
+ebtables -A FORWARD -i wlan+ -o wlan+ --jump DROP
+ebtables -A FORWARD -i wlan+ -o eth+ --jump DROP
+ebtables -A FORWARD -i eth+ -o wlan+ --jump DROP
+GREDEV=gre-wifi
+GREDEVBR1=${GREDEV}.1
+GREDEVBR2=${GREDEV}.2
+GREDEVM=${GREDEV}.4094
+for i in /lib/modules/*/gre.ko
+do
+	insmod $i
+done
+for i in /lib/modules/*/ip_gre.ko
+do
+	insmod $i
+done
+ip link add ${GREDEV} type gretap remote $(uci get oeps.provision.server) nopmtudisc
+ip link set mtu 1504 ${GREDEV}
+if uci get network.mgt.ipaddr > /dev/null
+then
+	GREDEVMAC=$(printf "02:ff:%02x:%02x:%02x:%02x" $(uci get network.mgt.ipaddr|tr . ' '))
+else
+	GREDEVMAC="02:fe:"$(cut -d: -f3-6 < /sys/class/net/eth0/address)
+fi
+ip link set addr ${GREDEVMAC} dev ${GREDEV}
+ip link set up ${GREDEV}
+ip link add link ${GREDEV} name ${GREDEVBR1} type vlan id 1
+#ip link set addr ${GREDEVMAC1} dev ${GREDEVBR1}
+ip link set up ${GREDEVBR1}
+ip link add link ${GREDEV} name ${GREDEVBR2} type vlan id 2
+#ip link set addr ${GREDEVMAC2} dev ${GREDEVBR2}
+ip link set up ${GREDEVBR2}
+brctl addif br-wifi ${GREDEVBR1}
+brctl addif br-swifi ${GREDEVBR2}
+ip link add link ${GREDEV} name ${GREDEVM} type vlan id 4094
+ip link set up ${GREDEVM}
+
+# Make a pathway through the firewall
+# Assume PTP to ip address .1
+ping -I gre-wifi.4094 -c 2 -w 10 $(uci get network.mgt.ipaddr|cut -d. -f1-3).1

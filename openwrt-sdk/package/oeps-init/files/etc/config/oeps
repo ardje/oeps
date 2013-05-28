@@ -1,0 +1,4 @@
+config global provision
+	option register true
+	option setupgre true
+	option server 192.168.1.1

@@ -1,0 +1,57 @@
+#!/bin/sh
+STATE=""
+RS=""
+# My "number"
+APNR=$(ip ro get 10.51.12.1|awk -F . '/src/ { print $8 }')
+# Delay registering this many seconds (happens each 5 minutes!)
+[ "$1" = "refresh" ] &&[ "$APNR" -gt 0 ] && sleep $APNR
+
+# Kludge to fix wifi
+if [ "$(dmesg|tail -12|grep "Failed to stop TX DMA"|wc -l)" -ge 7 ]
+then
+	wifi down
+	STATE="$STATE&wifirestart=yes"
+	RS=WIFIRESTART
+	echo timer > /sys/devices/platform/leds-gpio/leds/wndr3700:orange:wps/trigger
+fi
+
+# Try two pings to the backbone
+# if that fails stop wifi
+if ! ping -I gre-wifi.4094 -c 2 -w 10 10.51.12.1
+then
+	wifi down
+	RS=NOROUTEONBACKBONE
+	echo timer > /sys/devices/platform/leds-gpio/leds/wndr3700:orange:wps/trigger
+fi
+
+if $(uci get temnl.provision.register)
+then
+	MAC=$(ip li show dev eth0|awk '/ether/ { print $2 }')
+	if [ "$1" = "refresh" ] &&
+		! test -e /var/run/hostapd-phy0.conf ||
+		( ! test -d /sys/class/ieee80211/phy0/device/net/mon.wlan0 && test -s /var/run/hostapd-phy0.conf)
+	then
+		STATE="$STATE&state=needprovision"
+		RS="NOTPROVISIONED"
+		echo timer > /sys/devices/platform/leds-gpio/leds/wndr3700:orange:wps/trigger
+	else
+		echo none > /sys/devices/platform/leds-gpio/leds/wndr3700:orange:wps/trigger
+		if [ "$1" = "refresh" ] && [ -e /var/run/apping.stamp ] 
+		then
+			if [ $((`date +%s` - `date +%s -r /var/run/apping.stamp`)) -lt 400 ]
+			then
+				# Skip refresh... Host already knows...
+				exit 0
+			else
+				rm /var/run/apping.stamp
+			fi
+		fi
+		[ "$1" = "" ] || STATE="$STATE&state=$1" && shift
+		[ "$1" = "" ] || STATE="$STATE&data=$1" && shift
+	fi
+	[ -e /tmp/registering ] && exit 0
+	touch /tmp/registering
+	/usr/bin/timeout -k20s 10 wget -O /dev/null "http://10.54.21.11/cgi-bin/register.cgi?mac=${MAC}${STATE}&host=$(uname -n)" 2> /dev/null 
+	rm /tmp/registering
+	rm /var/run/apping.stamp
+fi

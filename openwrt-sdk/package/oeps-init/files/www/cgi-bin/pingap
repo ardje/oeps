@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "Content-Type: text/plain"
+echo 
+touch /var/run/apping.stamp
