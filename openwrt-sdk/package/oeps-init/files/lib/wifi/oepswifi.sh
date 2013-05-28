@@ -36,7 +36,7 @@ disable_oepswifi() (
 enable_oepswifi() {
 	local device="$1"
 	iw reg set US
-	if ! ip ro get 10.54.21.11 > /dev/null 
+	if ! ip ro get $(uci get oeps.provision.server) > /dev/null 
 	then
 		echo "backbone not reachable"
 		# Kludge: we are here because we are booting. Load Fixed world regulatory
@@ -63,7 +63,7 @@ enable_oepswifi() {
 		BSSID3="$(mac80211_generate_mac $macidx $macaddr)";macidx="$(($macidx + 1))"
 		echo $BSSID1 - $BSSID2 - $BSSID3
 		provisionmac="$(cat /sys/class/ieee80211/phy0/macaddress)"
-		wget -O - "http://10.54.21.11/cgi-bin/hostapd-config.cgi?mac=$provisionmac&phy=${phy/phy/}" 2> /dev/null > ${cfgfile}.raw || succeeded=0
+		wget -O - "http://$(uci get oeps.provision.server)/cgi-bin/hostapd-config.cgi?mac=$provisionmac&phy=${phy/phy/}" 2> /dev/null > ${cfgfile}.raw || succeeded=0
 		sed "s!@_BSSID1_@!$BSSID1!;s!@_BSSID2_@!$BSSID2!;s!@_BSSID3_@!$BSSID3!" < ${cfgfile}.raw > $cfgfile
 		rm ${cfgfile}.raw
 		if [ -s $cfgfile ]	
