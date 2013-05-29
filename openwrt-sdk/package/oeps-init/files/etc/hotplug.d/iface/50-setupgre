@@ -18,9 +18,10 @@ setupgre() {
 	# Kludge to enable and fix cron
 	if ! [ -e /etc/crontabs/root ] || ! grep -q registerme /etc/crontabs/root
 	then
+		BB=$(uci get network.mgt.ipaddr|cut -d. -f1-3).1
 		cat - > /tmp/crontabs-root <<EOF
 */5 * * * * /usr/bin/registerme refresh > /dev/null 2>&1
-* * * * * ping -I gre-wifi.4094 -c 1 -w 10 10.51.12.1 > /dev/null 2>&1
+* * * * * ping -I gre-wifi.4094 -c 1 -w 10 ${BB} > /dev/null 2>&1
 EOF
 		cmp -s /tmp/crontabs-root /etc/crontabs/root || mv /tmp/crontabs-root /etc/crontabs/root
 	fi

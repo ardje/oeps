@@ -2,7 +2,8 @@
 STATE=""
 RS=""
 # My "number"
-APNR=$(ip ro get 10.51.12.1|awk -F . '/src/ { print $8 }')
+APNR=$(uci get network.mgt.ipaddr|cut -d. -f4)
+BB=$(uci get network.mgt.ipaddr|cut -d. -f1-3).1
 # Delay registering this many seconds (happens each 5 minutes!)
 [ "$1" = "refresh" ] &&[ "$APNR" -gt 0 ] && sleep $APNR
 
@@ -17,14 +18,14 @@ fi
 
 # Try two pings to the backbone
 # if that fails stop wifi
-if ! ping -I gre-wifi.4094 -c 2 -w 10 10.51.12.1
+if ! ping -I gre-wifi.4094 -c 2 -w 10 ${BB}
 then
 	wifi down
 	RS=NOROUTEONBACKBONE
 	echo timer > /sys/devices/platform/leds-gpio/leds/wndr3700:orange:wps/trigger
 fi
 
-if $(uci get temnl.provision.register)
+if $(uci get oeps.provision.register)
 then
 	MAC=$(ip li show dev eth0|awk '/ether/ { print $2 }')
 	if [ "$1" = "refresh" ] &&
@@ -51,7 +52,7 @@ then
 	fi
 	[ -e /tmp/registering ] && exit 0
 	touch /tmp/registering
-	/usr/bin/timeout -k20s 10 wget -O /dev/null "http://10.54.21.11/cgi-bin/register.cgi?mac=${MAC}${STATE}&host=$(uname -n)" 2> /dev/null 
+	/usr/bin/timeout -k20s 10 wget -O /dev/null "http://$(uci get oeps.provision.server)/cgi-bin/register.cgi?mac=${MAC}${STATE}&host=$(uname -n)" 2> /dev/null 
 	rm /tmp/registering
 	rm /var/run/apping.stamp
 fi
