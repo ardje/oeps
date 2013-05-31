@@ -1,0 +1,14 @@
+This is the Openwrt (based) Enterprise Provisioning System.
+
+Copyright (C) 2007-2013 TMI/TMG
+Copyright (C) 2007-2013 Ard van Breemen <ard@kwaak.net>
+
+
+Oeps is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2, or (at your option) any later
+version.
+
+Oeps is the result of Open Sourcing an inhouse build "provisioning" system.  As
+a management decision, Oeps is open source. Names are changed and configuration
+is generalized.
