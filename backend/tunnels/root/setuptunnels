@@ -1,0 +1,109 @@
+#!/bin/bash
+export PATH=${PATH}:/usr/bin:/usr/sbin
+STATEDIR=/root/tunnels
+WWWDIR=/var/www/data
+
+
+updatetunnelstatus() {
+	CLIENTNAME="$1";shift
+	CLIENTIP="$1";shift
+	GREDEV=gre-${CLIENTNAME:0:9}
+	GREDEVBR1=${GREDEV}.1
+	GREDEVBR2=${GREDEV}.2
+	echo $CLIENTIP > "$STATEDIR"/.tmp.$GREDEV
+	mv "$STATEDIR"/.tmp.$GREDEV "$STATEDIR"/$GREDEV
+}
+
+testtunnelip() {
+	CLIENTNAME="$1";shift
+	CLIENTIP="$1";shift
+	GREDEV=gre-${CLIENTNAME:0:9}
+	GREDEVBR1=${GREDEV}.1
+	GREDEVBR2=${GREDEV}.2
+	if [ -e "$STATEDIR"/$GREDEV ]
+	then
+		read OLDIP < "$STATEDIR"/$GREDEV
+		if [ "$OLDIP" = "$CLIENTIP" ]
+		then
+			return 0
+		fi
+	fi
+	return 1
+}
+
+setuptunnel() {
+	CLIENTNAME="$1";shift
+	CLIENTIP="$1";shift
+	GREDEV=gre-${CLIENTNAME:0:9}
+	GREDEVBR1=${GREDEV}.1
+	GREDEVBR2=${GREDEV}.2
+	GREDEVBRM=${GREDEV}.m
+	CLIENTMGTIP=`grep $CLIENTNAME /var/www/htdocs/provision/names.sh  | awk '{ print $3 }'`
+	GREDEVMAC=$(printf "02:7f:%02x:%02x:%02x:%02x" $(echo $CLIENTMGTIP|tr . ' '))
+	ip link delete dev ${GREDEVBR2} &> /dev/null
+	ip link delete dev ${GREDEVBR1} &> /dev/null
+	ip link delete dev ${GREDEV} &> /dev/null
+	ip link add ${GREDEV} type gretap remote ${CLIENTIP} nopmtudisc
+	ip link set mtu 1504 ${GREDEV}
+	ip link set addr ${GREDEVMAC} dev ${GREDEV}
+	ip link set up ${GREDEV}
+	ip link add link ${GREDEV} name ${GREDEVBR1} type vlan id 1 
+	ip link set up ${GREDEVBR1}
+	brctl addif br-vlan2929 ${GREDEVBR1}
+	ip link add link ${GREDEV} name ${GREDEVBR2} type vlan id 2 
+	ip link set up ${GREDEVBR2}
+	brctl addif br-vlan2928 ${GREDEVBR2}
+	#mgt
+	ip link add link ${GREDEV} name ${GREDEVBRM} type vlan id 4094 
+	ip link set up ${GREDEVBRM}
+	ip a a 10.51.12.1 dev ${GREDEVBRM}
+	ip r a ${CLIENTMGTIP}/32 dev ${GREDEVBRM}
+
+	#hier nog een hostroute maken naar het device. (ff uit de config file lezen wat het ip is)
+	#klaar
+	echo Setting up tunnel for ${CLIENTNAME}@${CLIENTIP}
+}
+
+refreshtunnel() {
+	CLIENTNAME="$1";shift
+	CLIENTIP="$1";shift
+	GREDEV=gre-${CLIENTNAME:0:9}
+	GREDEVBR1=${GREDEV}.1
+	GREDEVBR2=${GREDEV}.2
+	if ip link show dev ${GREDEVBR1} &> /dev/null && ip link show dev ${GREDEVBR2} &> /dev/null
+	then
+		if ! testtunnelip ${CLIENTNAME} ${CLIENTIP}
+		then
+			setuptunnel ${CLIENTNAME} ${CLIENTIP}
+		fi
+	else
+		setuptunnel ${CLIENTNAME} ${CLIENTIP}
+	fi
+	updatetunnelstatus ${CLIENTNAME} ${CLIENTIP}
+}
+
+
+cd $WWWDIR
+find /var/www/data -gid 33 -type f -mmin +10 -delete
+for mac in *
+do
+	if [ -e "$mac" ]
+	then
+		. $mac
+		if  [ "${HOST}" = "penrt" ] || [ "${HOST}" = "OpenWrt" ]
+		then
+			continue
+		fi
+		refreshtunnel ${HOST} ${CLIENT}
+	fi
+done
+cd $STATEDIR
+find /root/tunnels -mmin +8 -type f -print| while read stale
+do
+	echo $stale is stale
+	DEV=$(basename $stale)
+	ip link del ${DEV}.2
+	ip link del ${DEV}.1
+	ip link del ${DEV}
+	mv $stale /root/stale
+done

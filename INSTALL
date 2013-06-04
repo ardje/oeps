@@ -1,0 +1,17 @@
+Installation instructions:
+Well, forget about instructions, I am just trying to "package" what is working right now.
+
+Access point:
+openwrt-sdk/
+contains the "code" needed on the accesspoint to stay online. You need the openwrt sdk to build it. Just put the package directory contents in the right place and type make.
+
+Backend:
+Backend contains a few legacy things: The biggest legacy is the tunnel maker.
+The tunnel maker creates a gre-tunnel with vlans to the right access points.
+I currently have this in the crontab of root:
+* * * * * /root/setuptunnels
+
+The script is filled with data from a webserver through a status directory.
+The status directory contains log data of each accesspoint, registered with
+their mac.
+As I said it is legacy, it should be changed, but it works.
