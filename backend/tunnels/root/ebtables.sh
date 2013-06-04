@@ -10,6 +10,7 @@
 # Short-Description: Start ebtables
 # Description:       Start ebtables
 ### END INIT INFO
+. /root/config
 ebt() {
 	/sbin/ebtables -t filter -A FORWARD --logical-in ${BRIDGE} "$@"
 }
@@ -51,17 +52,17 @@ enablecross() {
 #enablecross blurr brawn ratchet snarler
 #exit
 setuprules() {
-	#eerste keer voor 2928
-	BRIDGE=br-vlan2928
+	#eerste keer voor VLANCRYPTED
+	BRIDGE=br-vlan${VLANCRYPTED}
 	# Everything firewall is accepted
-	for theMac in 0:11:43:e1:99:36 0:11:43:e1:99:37 0:11:43:e2:1:2e 0:0:5e:0:1:16
+	for theMac in ${ALLOWEDMACS}
 	do
-		ebt -s ${theMac} -i vlan2928 -j ACCEPT
+		ebt -s ${theMac} -i vlan${VLANCRYPTED} -j ACCEPT
 	done
 	# Other traffic from the switch to the accesspoints: drop it!
-	ebt -i vlan2928 -o gre-+ -j DROP 
+	ebt -i vlan${VLANCRYPTED} -o gre-+ -j DROP 
 	# Traffic from the DHCP server
-	ebt -i v2928-host -j ACCEPT 
+	ebt -i v${VLANCRYPTED}-host -j ACCEPT 
 
 	# LOG and DROP packets directed at BGA
 	ebti -i gre-+ -d 01:80:c2:00:00:00 --log --log-prefix "BGA: " -j DROP
@@ -75,19 +76,19 @@ setuprules() {
 	ebt -i gre-+ -o gre-+ -j DROP 
 
 	# Generic traffic to DHCP and such allowed
-	ebt -i vlan2928 -j ACCEPT 
+	ebt -i vlan${VLANCRYPTED} -j ACCEPT 
 
-	#nu voor 2929
-	BRIDGE=br-vlan2929
+	#nu voor ${VLANUNENCRYPTED}
+	BRIDGE=br-vlan${VLANUNENCRYPTED}
 	# Everything firewall is accepted
 	for theMac in 0:11:43:e1:99:36 0:11:43:e1:99:37 0:11:43:e2:1:2e 0:0:5e:0:1:16
 	do
-		ebt -s ${theMac} -i vlan2929 -j ACCEPT
+		ebt -s ${theMac} -i vlan${VLANUNENCRYPTED} -j ACCEPT
 	done
 	# Other traffic from the switch to the accesspoints: drop it!
-	ebt -i vlan2929 -o gre-+ -j DROP 
+	ebt -i vlan${VLANUNENCRYPTED} -o gre-+ -j DROP 
 	# Traffic from the DHCP server
-	ebt -i v2929-host -j ACCEPT 
+	ebt -i v${VLANUNENCRYPTED}-host -j ACCEPT 
 	# LOG and DROP packets directed at BGA
 	#ebt -i gre-+ -d 01:80:c2:00:00:00 -j LOG
 	ebti -i gre-+ -d 01:80:c2:00:00:00 --log --log-prefix "BGA: " -j DROP
@@ -102,7 +103,7 @@ setuprules() {
 	ebt -i gre-+ -o gre-+ -j DROP 
 
 	# Generic traffic to DHCP and such allowed
-	ebt -i vlan2929 -j ACCEPT 
+	ebt -i vlan${VLANUNENCRYPTED} -j ACCEPT 
 }
 
 case "$1" in
