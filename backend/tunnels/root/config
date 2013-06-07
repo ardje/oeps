@@ -1,0 +1,9 @@
+# To prevent unnecessary broadcasts all traffic to the accesspoint network must
+# be filtered.
+# These are the macs of the firewalls
+# we use vrrp macs as well as addresses of the firewalls themselves.
+ALLOWEDMACS="0:11:43:XX:XX:XX 0:11:43:XX:XX:XX 0:11:43:XX:XX:XX 0:0:5e:0:1:XX"
+
+# We differentiate between crypted networks and unencrypted networks
+VLANCRYPTED="10"
+VLANUNENCRYPTED="11"

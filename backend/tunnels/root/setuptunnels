@@ -2,6 +2,7 @@
 export PATH=${PATH}:/usr/bin:/usr/sbin
 STATEDIR=/root/tunnels
 WWWDIR=/var/www/data
+. /root/config
 
 
 updatetunnelstatus() {
@@ -49,10 +50,10 @@ setuptunnel() {
 	ip link set up ${GREDEV}
 	ip link add link ${GREDEV} name ${GREDEVBR1} type vlan id 1 
 	ip link set up ${GREDEVBR1}
-	brctl addif br-vlan2929 ${GREDEVBR1}
+	brctl addif br-vlan${VLANUNENCRYPTED} ${GREDEVBR1}
 	ip link add link ${GREDEV} name ${GREDEVBR2} type vlan id 2 
 	ip link set up ${GREDEVBR2}
-	brctl addif br-vlan2928 ${GREDEVBR2}
+	brctl addif br-vlan${VLANCRYPTED} ${GREDEVBR2}
 	#mgt
 	ip link add link ${GREDEV} name ${GREDEVBRM} type vlan id 4094 
 	ip link set up ${GREDEVBRM}
