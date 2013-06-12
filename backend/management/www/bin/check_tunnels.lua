@@ -18,7 +18,7 @@ local exitcode=0
 local status="OK"
 local message=""
 local dbi=luasql.mysql()
-local dbh=dbi:connect(co.dbname,co.dbuser,co.dbpassword)
+local dbh=dbi:connect(co.DBNAME,co.DBUSER,co.DBPASSWORD)
 local res=dbh:execute([[
 select name,state from ap where state != "UP" and adminstate = "PRODUCTION" and TIMESTAMPDIFF(DAY,lastcontact,NOW())<7
 ]])
