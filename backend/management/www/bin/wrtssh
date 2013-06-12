@@ -1,0 +1,4 @@
+#!/bin/sh
+. /etc/oeps/config
+theHost=$1;shift
+exec /usr/bin/ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -l root $(mysql -B --skip-column-names -u${DBUSER} -p{DBPASSWORD} ${DBNAME} -e "select management_ip from ap where name = '$theHost'") "$@"
