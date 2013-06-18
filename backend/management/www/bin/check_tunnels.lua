@@ -2,17 +2,10 @@
 
 -- ElCheapo mysql interface
 require "luasql.mysql"
-local file="/etc/oeps/config"
-local co={}
-local code
-if _G._VERSION == "Lua 5.1"
-then
-	code=assert(loadfile(file,"t"))
-	if code then setfenv(code,co) end
-else
-	code=assert(loadfile(file,"t",co))
-end
-code()
+
+
+local c=require("oeps.config")
+local co=c.getconfig()
 
 local exitcode=0
 local status="OK"
