@@ -16,7 +16,7 @@ end
 
 function m.getconfig()
 	local c={}
-	local code=m.configload("../../etc/oeps/config",c)
+	local code=m.configload("/etc/oeps/config",c)
 	code()
 	return c
 end
