@@ -35,17 +35,15 @@ disable_oepswifi() (
 
 enable_oepswifi() {
 	local device="$1"
-	iw reg set US
+	iw reg set NL
 	if ! ip ro get $(uci get oeps.provision.server) > /dev/null 
 	then
-		echo "backbone not reachable"
-		# Kludge: we are here because we are booting. Load Fixed world regulatory
-		echo 255 > /sys/class/leds/wndr3700:orange:wps/brightness
+		echo "No route to backbone"
+		# echo 255 > /sys/class/leds/wndr3700:orange:wps/brightness
 		return 0
 	else
-		# Kludge: we are here because we are started for operations
-		# "Downgrade" world regulatory to NL
-		echo 0 > /sys/class/leds/wndr3700:orange:wps/brightness
+		echo "Route available"
+		# echo 0 > /sys/class/leds/wndr3700:orange:wps/brightness
 	fi
 	succeeded=1
 	for phy in phy0 phy1
@@ -58,9 +56,9 @@ enable_oepswifi() {
 
 		cfgfile="/var/run/hostapd-$phy.conf"
 		macaddr="$(cat /sys/class/ieee80211/$phy/macaddress)"
-		BSSID1="$(mac80211_generate_mac $macidx $macaddr)";macidx="$(($macidx + 1))"
-		BSSID2="$(mac80211_generate_mac $macidx $macaddr)";macidx="$(($macidx + 1))"
-		BSSID3="$(mac80211_generate_mac $macidx $macaddr)";macidx="$(($macidx + 1))"
+		BSSID1="$(mac80211_generate_mac $macidx $macaddr $(cat /sys/class/ieee80211/${phy}/address_mask))";macidx="$(($macidx + 1))"
+		BSSID2="$(mac80211_generate_mac $macidx $macaddr $(cat /sys/class/ieee80211/${phy}/address_mask))";macidx="$(($macidx + 1))"
+		BSSID3="$(mac80211_generate_mac $macidx $macaddr $(cat /sys/class/ieee80211/${phy}/address_mask))";macidx="$(($macidx + 1))"
 		echo $BSSID1 - $BSSID2 - $BSSID3
 		provisionmac="$(cat /sys/class/ieee80211/phy0/macaddress)"
 		wget -O - "http://$(uci get oeps.provision.server)/cgi-bin/hostapd-config.cgi?mac=$provisionmac&phy=${phy/phy/}" 2> /dev/null > ${cfgfile}.raw || succeeded=0
@@ -68,17 +66,6 @@ enable_oepswifi() {
 		rm ${cfgfile}.raw
 		if [ -s $cfgfile ]	
 		then
-			iw reg set NL
-			if [ "$phy" = "phy1"  ] && [ ! -f /tmp/wifikludged ];
-			then
-				touch /tmp/wifikludged
-				# We need some kludging to get to the max power.
-				iw phy "$phy" interface add wlan${phy#phy} type managed
-				iw dev wlan"${phy#phy}" set txpower limit 2000
-				ip link set up dev wlan${phy#phy}	
-				ip link set down dev wlan${phy#phy}	
-				iw dev wlan${phy#phy} del
-			fi
 			iw phy "$phy" set txpower limit 2000
 			iw phy "$phy" interface add wlan${phy#phy} type managed
 			iw dev wlan"${phy#phy}" set txpower limit 2000
@@ -88,12 +75,12 @@ enable_oepswifi() {
 			}
 		fi
 	done
-	if [ "$succeeded" -gt 0 ]
-	then
-		echo 255 > /sys/class/leds/wndr3700:green:wps/brightness
-	else
-		echo 0 > /sys/class/leds/wndr3700:green:wps/brightness
-	fi
+#	if [ "$succeeded" -gt 0 ]
+#	then
+#		echo 255 > /sys/class/leds/wndr3700:green:wps/brightness
+#	else
+#		echo 0 > /sys/class/leds/wndr3700:green:wps/brightness
+#	fi
 }
 
 
