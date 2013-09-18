@@ -19,14 +19,14 @@ define Package/oeps-init
   SECTION:=utils
   CATEGORY:=Base system
   DEPENDS:=+ip +luci-ssl +kmod-gre +tcpdump +kmod-ath9k +wpad +ebtables +coreutils-timeout
-  TITLE:=TEM openwrt provisioning
+  TITLE:=Openwrt Enterprise Provisioning System
   PKGARCH:=all
 endef
 
 define Package/oeps-init/description
- Auto install and configure TEM stations
+ Auto install and configures openwrt supported accesspoints
  Manage accesspoints from a central configuration database
- to enable the quick update and runin of large networks
+ to enable the quick update and runin of large roaming networks
  of access points.
 endef
 
