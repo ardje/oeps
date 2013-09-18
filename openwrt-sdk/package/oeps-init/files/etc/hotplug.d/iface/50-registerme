@@ -1,0 +1,17 @@
+doregister() {
+	case "$INTERFACE" in
+		mgt|wifi)
+			/usr/bin/registerme ifup $INTERFACE
+			;;
+		*)
+			;;
+	esac
+}
+case "$ACTION" in
+        ifup)
+		if $(uci get oeps.provision.setupgre)
+		then
+			route -n | grep -q ^0.0.0.0 && doregister
+		fi
+		;;
+esac
