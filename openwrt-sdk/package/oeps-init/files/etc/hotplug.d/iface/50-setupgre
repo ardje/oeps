@@ -1,13 +1,4 @@
-enableservice() {
-	if ! [ -e /etc/rc.d/*$1 ]
-	then 
-		/etc/init.d/$1 enable
-		/etc/init.d/$1 start
-	fi
-}
-setupgre() {
-	set -x
-        /usr/bin/setupgre
+doregister() {
 	case "$INTERFACE" in
 		mgt|wifi)
 			/usr/bin/registerme ifup $INTERFACE
@@ -15,23 +6,12 @@ setupgre() {
 		*)
 			;;
 	esac
-	# Kludge to enable and fix cron
-	if ! [ -e /etc/crontabs/root ] || ! grep -q registerme /etc/crontabs/root
-	then
-		BB=$(uci get network.mgt.ipaddr|cut -d. -f1-3).1
-		cat - > /tmp/crontabs-root <<EOF
-*/5 * * * * /usr/bin/registerme refresh > /dev/null 2>&1
-* * * * * ping -I gre-wifi.4094 -c 1 -w 10 ${BB} > /dev/null 2>&1
-EOF
-		cmp -s /tmp/crontabs-root /etc/crontabs/root || mv /tmp/crontabs-root /etc/crontabs/root
-	fi
-	enableservice cron
-	set +x
 }
 case "$ACTION" in
         ifup)
 		if $(uci get oeps.provision.setupgre)
 		then
-			route -n | grep -q ^0.0.0.0 && setupgre
-		fi;;
+			route -n | grep -q ^0.0.0.0 && doregister
+		fi
+		;;
 esac
