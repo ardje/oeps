@@ -18,6 +18,7 @@ do
 done
 ip link add ${GREDEV} type gretap remote $(uci get oeps.provision.server) nopmtudisc
 ip link set mtu 1504 ${GREDEV}
+echo 1 > /proc/sys/net/ipv6/conf/${GREDEV}/disable_ipv6
 if uci get network.mgt.ipaddr > /dev/null
 then
 	GREDEVMAC=$(printf "02:ff:%02x:%02x:%02x:%02x" $(uci get network.mgt.ipaddr|tr . ' '))
