@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=oeps-init
 PKG_VERSION:=1.0.16
-PKG_RELEASE:=26
+PKG_RELEASE:=27
 
 PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
 
