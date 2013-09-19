@@ -1,6 +1,6 @@
 doregister() {
 	case "$INTERFACE" in
-		mgt|wifi)
+		mgt|wifi|wan)
 			/usr/bin/registerme ifup $INTERFACE
 			;;
 		*)
