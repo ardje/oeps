@@ -7,6 +7,10 @@ BB=$(uci get network.mgt.ipaddr|cut -d. -f1-3).1
 # Delay registering this many seconds (happens each 5 minutes!)
 [ "$1" = "refresh" ] && [ "$APNR" -gt 0 ] && sleep $APNR
 
+# Kludge to disable ipv6 again
+GREDEV=gre-wifi
+echo 1 > /proc/sys/net/ipv6/conf/${GREDEV}/disable_ipv6
+
 # Kludge to fix wifi
 if [ "$(dmesg|tail -12|grep "Failed to stop TX DMA"|wc -l)" -ge 7 ]
 then
