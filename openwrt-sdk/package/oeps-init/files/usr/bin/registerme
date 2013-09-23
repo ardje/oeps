@@ -57,7 +57,7 @@ then
 	fi
 	[ -e /tmp/registering ] && exit 0
 	touch /tmp/registering
-	/usr/bin/timeout -k20s 10 wget -O /dev/null "http://$(uci get oeps.provision.server)/cgi-bin/register.cgi?mac=${MAC}${STATE}&host=$(uname -n)" 2> /dev/null 
+	/usr/bin/timeout -k20s 10 wget -O /dev/null "http://$(uci get oeps.provision.server)/cgi-bin/register.cgi?mac=${MAC}${STATE}&host=$(uname -n)&oepsver=$(oepsGetVersion)" 2> /dev/null 
 	rm /tmp/registering
 	rm /var/run/apping.stamp
 fi
