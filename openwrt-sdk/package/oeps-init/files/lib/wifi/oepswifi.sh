@@ -34,6 +34,7 @@ disable_oepswifi() (
 )
 
 enable_oepswifi() {
+	. /lib/oeps.sh
 	local device="$1"
 	iw reg set NL
 	if ! ip ro get $(uci get oeps.provision.server) > /dev/null 
@@ -60,7 +61,7 @@ enable_oepswifi() {
 		BSSID2="$(mac80211_generate_mac $macidx $macaddr $(cat /sys/class/ieee80211/${phy}/address_mask))";macidx="$(($macidx + 1))"
 		BSSID3="$(mac80211_generate_mac $macidx $macaddr $(cat /sys/class/ieee80211/${phy}/address_mask))";macidx="$(($macidx + 1))"
 		echo $BSSID1 - $BSSID2 - $BSSID3
-		provisionmac="$(cat /sys/class/ieee80211/phy0/macaddress)"
+		provisionmac="$(oepsGetID)"
 		wget -O - "http://$(uci get oeps.provision.server)/cgi-bin/hostapd-config.cgi?mac=$provisionmac&phy=${phy/phy/}" 2> /dev/null > ${cfgfile}.raw || succeeded=0
 		sed "s!@_BSSID1_@!$BSSID1!;s!@_BSSID2_@!$BSSID2!;s!@_BSSID3_@!$BSSID3!" < ${cfgfile}.raw > $cfgfile
 		rm ${cfgfile}.raw
