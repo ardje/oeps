@@ -1,4 +1,5 @@
 #!/bin/sh
+. /lib/oeps.sh
 STATE=""
 RS=""
 # My "number"
@@ -6,6 +7,10 @@ APNR=$(uci get network.mgt.ipaddr|cut -d. -f4)
 BB=$(uci get network.mgt.ipaddr|cut -d. -f1-3).1
 # Delay registering this many seconds (happens each 5 minutes!)
 [ "$1" = "refresh" ] && [ "$APNR" -gt 0 ] && sleep $APNR
+
+# Kludge to disable ipv6 again
+GREDEV=gre-wifi
+echo 1 > /proc/sys/net/ipv6/conf/${GREDEV}/disable_ipv6
 
 # Kludge to fix wifi
 if [ "$(dmesg|tail -12|grep "Failed to stop TX DMA"|wc -l)" -ge 7 ]
@@ -27,7 +32,7 @@ fi
 
 if $(uci get oeps.provision.register)
 then
-	MAC=$(ip li show dev eth0|awk '/ether/ { print $2 }')
+	MAC=$(oepsGetID)
 	if [ "$1" = "refresh" ] &&
 		! test -e /var/run/hostapd-phy0.conf ||
 		( ! test -d /sys/class/ieee80211/phy0/device/net/wlan0 && test -s /var/run/hostapd-phy0.conf)
@@ -52,7 +57,7 @@ then
 	fi
 	[ -e /tmp/registering ] && exit 0
 	touch /tmp/registering
-	/usr/bin/timeout -k20s 10 wget -O /dev/null "http://$(uci get oeps.provision.server)/cgi-bin/register.cgi?mac=${MAC}${STATE}&host=$(uname -n)" 2> /dev/null 
+	/usr/bin/timeout -k20s 10 wget -O /dev/null "http://$(uci get oeps.provision.server)/cgi-bin/register.cgi?mac=${MAC}${STATE}&host=$(uname -n)&oepsver=$(oepsGetVersion)" 2> /dev/null 
 	rm /tmp/registering
 	rm /var/run/apping.stamp
 fi
