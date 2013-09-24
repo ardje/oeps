@@ -1,0 +1,30 @@
+#!/bin/sh /etc/rc.common
+
+START=15
+STOP=90
+
+enableservice() {
+	if ! [ -e /etc/rc.d/*$1 ]
+	then 
+		/etc/init.d/$1 enable
+		/etc/init.d/$1 start
+	fi
+}
+fixcron() {
+	if ! [ -e /etc/crontabs/root ] || ! grep -q registerme /etc/crontabs/root
+	then
+		BB=$(uci get network.mgt.ipaddr|cut -d. -f1-3).1
+		cat - > /tmp/crontabs-root <<EOF
+*/5 * * * * /usr/bin/registerme refresh > /dev/null 2>&1
+* * * * * ping -I gre-wifi.4094 -c 1 -w 10 ${BB} > /dev/null 2>&1
+EOF
+		cmp -s /tmp/crontabs-root /etc/crontabs/root || mv /tmp/crontabs-root /etc/crontabs/root
+	fi
+	enableservice cron
+}
+
+start() {
+	/usr/bin/setupgre
+	fixcron
+}
+

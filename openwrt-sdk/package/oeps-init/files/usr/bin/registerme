@@ -5,7 +5,7 @@ RS=""
 APNR=$(uci get network.mgt.ipaddr|cut -d. -f4)
 BB=$(uci get network.mgt.ipaddr|cut -d. -f1-3).1
 # Delay registering this many seconds (happens each 5 minutes!)
-[ "$1" = "refresh" ] &&[ "$APNR" -gt 0 ] && sleep $APNR
+[ "$1" = "refresh" ] && [ "$APNR" -gt 0 ] && sleep $APNR
 
 # Kludge to fix wifi
 if [ "$(dmesg|tail -12|grep "Failed to stop TX DMA"|wc -l)" -ge 7 ]
@@ -30,7 +30,7 @@ then
 	MAC=$(ip li show dev eth0|awk '/ether/ { print $2 }')
 	if [ "$1" = "refresh" ] &&
 		! test -e /var/run/hostapd-phy0.conf ||
-		( ! test -d /sys/class/ieee80211/phy0/device/net/mon.wlan0 && test -s /var/run/hostapd-phy0.conf)
+		( ! test -d /sys/class/ieee80211/phy0/device/net/wlan0 && test -s /var/run/hostapd-phy0.conf)
 	then
 		STATE="$STATE&state=needprovision"
 		RS="NOTPROVISIONED"
