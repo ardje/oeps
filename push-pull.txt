@@ -6,6 +6,6 @@ git diff master # shows diff with current and master
 git merge master # merges changes 
 # Pull changes from marvel
 
-git pull marvel/marvel
+git pull marvel marvel
 
 # Pulls from marvel, branch marvel
