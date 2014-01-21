@@ -1,0 +1,6 @@
+# Push to production system
+git push marvel
+# will push master to marvel
+# on marvel:
+git diff master # shows diff with current and master
+git merge master # merges changes 
