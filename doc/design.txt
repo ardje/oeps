@@ -1,0 +1,20 @@
+OEPS design:
+- Open(wrt based) Enterprise *Provisioning* System
+I stress provisioning, because it's meant to set up all kinds of networks. The
+current focus is mainly wireless networking, but the large part of it is
+setting up networks.
+The idea is to have a generic device that can be configured to have one of its
+ports plugged into a particular soft bridge, and have another of its ports
+plugged into another soft bridge.
+Usually these ports are wireless networks, but they can be copper ports too.
+
+- Why?
+Usually an enterprise has a third party controlling the office automation.
+Just making some vlans on existing switches is near impossible in a lot of
+organizations. Furthermore: having a wireless network with > 1200 active
+clients cannot be handled correctly by most (cheap or expensive) switches
+without making sacrifices in the switch configuration.
+
+History:
+OEPS is the child of research into an enterprise wireless solution.
+It started out with a linksys WRT54G(L) using openvpn to connect to an openvpn tap bridge connected to a firewall. The openvpn and accesspoint did not have any networking functionality i
