@@ -1,0 +1,18 @@
+Authentication and authorization are 2 seperate items.
+Being identified (authentication) doesn't give you the right (authorization).
+Authorization usually implies some sort of authentication, or at least a form
+of identification, even if identified as anonymous.
+A lot of people also consider themselves the subject of authentication. A
+network really doesn't care about them, because he can't see, hear or talk to
+them. A network only sees a device.
+A network can authenticate a device with a certainty between 90% and 99.99%. (I
+just came up with that number, there is no science behind it.), but with a
+trust level from 0.001% to 99%.
+If you have an open wireless network, you can use the mac-address to identify
+somebody. There is a very high probability (close to 100%) that this
+mac-address uniquely identifies that device.
+But it's so very easy to change the mac-address of a wireless device to match
+some other device's address. My experience with network device driver writing
+is that it is usually much easier to let the user decide the mac-address, than
+to write that driver part that pulls it somewhere out of the "hardware".
+This makes the trust level of that identification close to 0%.

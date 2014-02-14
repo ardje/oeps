@@ -17,4 +17,74 @@ without making sacrifices in the switch configuration.
 
 History:
 OEPS is the child of research into an enterprise wireless solution.
-It started out with a linksys WRT54G(L) using openvpn to connect to an openvpn tap bridge connected to a firewall. The openvpn and accesspoint did not have any networking functionality i
+It started out with a linksys WRT54G(L) using openvpn to connect to an openvpn
+tap bridge connected to a firewall. The openvpn and accesspoint did not have
+any networking functionality inside the wireless networking. It picks up the
+packets and forwards it to the other side, which is either the wireless network
+or the switch with the firewall.
+Decoupling IP functionality, and hence reachability from the wireless network
+on the accesspoint and the openvpn bridge, made sure we had a pretty safe setup
+on which the accesspoint cannot be hacked and used to get into the network. It
+also simplified the network design: as long as the openvpn is reachable for the
+access point, it can join the wireless part with a larger L2 network.
+The accesspoints and openvpn were unable to communicate with the devices on the
+wireless network (except for hostapd communication), making it impossible to
+hack that part. Terminating that network on a firewall made everything secure.
+blablabla
+
+Life time of an access point:
+1) Runin
+a) stage 1: install openwrt
+Runin depends on the firmware bootloader.
+netgear)
+Any netgear can be runin by turning
+on the device while pressing the reset button.
+The device will boot in tftp-server mode and accepts signed images.
+Problem: how do we determine the model before we have access? -> user input
+
+tp-link)
+On tp-links you are a little screwed: the bootloader can only be managed using
+a serial console. So you either have an access-point with original firmware, or
+your installation. In either case you have to script installing it through
+either the uplink or the lan part.
+
+b) stage 2: install oeps.
+Once openwrt is freshly installed, you know that the lan part is accessible
+through telnet. An expect script can help run it in through telnet.
+The script wil fix /etc/opkg.conf pointing to your local oeps mirror and
+openwrt mirror. After that it will install the oeps package, and configure it
+according to site parameters.
+
+2) Bootup
+When the access point is turned on, openwrt will request an ip on the uplink.
+When it gets one it will start all scripts that wait for the wan up event.
+
+######################################################################
+Initial oeps parameters:
+oeps.id: <given upon installation>
+oeps.method: http
+oeps.http.server: <ip adres or name of backbone>
+oeps.http.uriprefix: <prefix of registration cgi>
+----------------------------------------------------------------------
+######################################################################
+initiall call to oeps.http.server:
+register: id=oeps.id, type=boot
+
+response: OK
+Setup OOB:
+type: vegre (vlan-ethernet-over-gre)
+vlan-id: 4094
+yourip: <ip>
+yourserver: <ip-of-server>
+endpoint: <ip>
+----------------------------------------------------------------------
+It signals the oeps backbone that an access point has come to live. The
+backbone replies with the parameters to set up an OOB tunnel.
+######################################################################
+second call: (through OOB to ip-of-server)
+register: id=oeps.id, type=provisionme
+----------------------------------------------------------------------
+It signals the backbone that the access point has successfully set up a tunnel
+and is ready to be set up.
+If the OOB can not be set up (firewalling) this message will never get through.
+######################################################################
