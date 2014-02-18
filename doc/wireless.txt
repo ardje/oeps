@@ -1,0 +1,27 @@
+Current design from a wireless network point of view is that roughly there is a
+bunch of accesspoints connected to eachother with a switch.
+You would have a lot of problems if you actually set it up like this.
+So:
+The wireless network is bridged through an ethernet tunnel over ip to a
+backbone server. That backbone server contains a single softswitch, with each
+accesspoint acting as one of it's ports.
+On that backbone all inter accespoint traffic is blocked, all multicast (broadcast is a special case multicast) is blocked, with the following exceptions:
+- from and to the firewall
+- from and to the dhcp server
+(- special cases mentioned elsewhere)
+On the accesspoint, all interclient traffic is denied. There is only traffic from the client to the backbone switch and vv.
+
+In the current installment, there are only 2 tunnels bridged called br-wifi and
+br-swifi (open wireless and encrypted wireless). Any accesspoint configured to
+also have bridged the copper switch (to obtain internet on an otherwise
+internet clean office), secretly has that traffic going over br-swifi. Traffic
+between the copper ports and the wireless is blocked on the access point.
+
+In a sense this is almost like a point-to-point connection, but then on level 2.
+There is not much room for cheating, since clients cannot communicate with
+eachother. There are not much broadcasts, except from the firewall.
+There are still some more things to be done to prevent broadcasts, and that is
+to make the firewall stop arping. This can be done by an ebtables filter,
+but recent events has shown that it is of no use to decouple the firewall from
+the backbone. Instead, the firewall could be run in a vserver on the backbone
+server. It's neighbour cache can be filled with data from the dhcp server.
