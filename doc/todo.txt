@@ -1,0 +1,28 @@
+--------------------
+Short term plans:
+--------------------
+
+Broadcast prevention, groupcast bugs circumvention
+- Make a mac address update api
+  *  Put this on the router to insert static mac entries.
+     We can also put timers on the entries that are twice the time of the dhcp
+     lease and let the dhcp refresh the arp entries.
+  *  Alternative:  creating ebtables entries.
+- Finish dhcp parser.
+- run it
+
+--------------------
+
+DMA bugs with ath9k: nbd says try latest trunk
+
+--------------------
+
+Create a third ethernet tunnel:
+Always have a br-wifi, br-swifi and copper seperately bridged to the backbone.
+This as a preliminary to dynamic setups.
+At the backbone we can allow traffic between the different tunnels.
+(Like allowing traffic between the copper and swifi part of an accesspoint, to
+let appliances like apple-tv work with local clients.)
+A second step would be to connect the different "ports" connected to database
+generated bridges.
+It would allow for a vpn like l2 connection between to sites.
