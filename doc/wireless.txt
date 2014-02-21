@@ -17,7 +17,7 @@ also have bridged the copper switch (to obtain internet on an otherwise
 internet clean office), secretly has that traffic going over br-swifi. Traffic
 between the copper ports and the wireless is blocked on the access point.
 
-In a sense this is almost like a point-to-point connection, but then on level 2.
+In a sense this is almost like a point-to-point connection, but on level 2.
 There is not much room for cheating, since clients cannot communicate with
 eachother. There are not much broadcasts, except from the firewall.
 There are still some more things to be done to prevent broadcasts, and that is
