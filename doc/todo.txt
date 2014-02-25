@@ -60,7 +60,7 @@ No code at all for now, just a design to
 
 --------------------
 
-Wireless security design:
+Wireless security *design*:
 - authentication? How? It should be easy for low IQ persons
   - device authentication (we've seen that device before/that device has
     strongly authenticated: 802.1X or WPA2 individual PSK)
@@ -68,3 +68,8 @@ Wireless security design:
 - authorization:
   - based on locality: where are you? get info from the radius servers
   - based on authentication trust level
+
+--------------------
+
+Research vxlan as tunnel mechanism for oeps-lite.
+
