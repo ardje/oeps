@@ -1,0 +1,40 @@
+The current implementation of the backbone is this:
+- network requirements:
+All access points are connected to a network that can route to the backbone,
+and are allowed and able to do gre and http to the backbone. (No NAT support in
+there!)
+
+
+- workings
+On bootup the accesspoints creates an ethernet over gre tunnel to the backbone.
+On that ethernet 3 vlans are created. Initially meant as a workaround on a no
+pmtudisc bug on e-o-gre. There are 2 payload vlans and a management vlan. The
+management vlan has a static ip configured upon runin.
+When it gets a lease it registers itself with the backbone by a GET request
+over http, containing the oeps-id which actually is the MAC addresss, the
+hostname, oeps version, and the register type.
+-------
+The access point does 3 types of registers:
+1- ifup wan -> wan connection has just been established. This sets the state to
+BOOT on the backbone
+2- ifup wifi -> This sets the state to UP
+3- needprovisioning -> the ifup wan has been missed or something else is wrong.
+This sets the state to BOOT on the backbone.
+
+AP states on the backbone:
+
+DOWN->BOOT->UP->STALE->DOWN
+
+STALE and DOWN is a matter of timing.
+-------
+ifup wan or needprovisioning
+The backbone registers this on the filesystem (legacy) and the database.
+A cron job run by root looks at the filesystem, and checks if new tunnels need
+to be created, existing ones changed, or old ones expired.
+The 2 wireless/payload vlans are attached to 2 softbridges, the management vlan
+is turned into a point-to-point connection with the backbone.
+A cron job run by some user looks at the database to all the access points in
+state BOOT. It will try to issue a wifirestart command through the management
+vlan, using a http GET.
+This either times out or just works.
+The access point will start the wireless connection
