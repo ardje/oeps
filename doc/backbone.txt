@@ -37,4 +37,55 @@ A cron job run by some user looks at the database to all the access points in
 state BOOT. It will try to issue a wifirestart command through the management
 vlan, using a http GET.
 This either times out or just works.
-The access point will start the wireless connection
+The access point will start the wireless connection by:
+for each wireless device request from the provision server the hostapd configuration.
+if 0 sized-> wifi is disabled.
+it starts hostapd in the normal way.
+It then calls back to the provision server with if wifi up.
+The provision server then marks the access point up.
+
+-------
+Monitoring:
+--
+The access point will ping the gateway on the management interface every minute.
+When it cannot reach it, it will consider the network as down, and shuts down the wireless interfaces.
+--
+The access point will check its status: is the wireless down, and not according to configuration: it will register with the provision server with the status "needsprovisioning" (which makes it status boot on the provision server)
+--
+The access point queries the log for certain errors and the amount of those
+errors. If needed it will restart the wifi, and will register the status wifirestarted.
+--
+The provision server will query the database for the accesspoints with the
+status up that haven't their status updated for at least 3 minutes. It will
+http-ping each access point through the management interface. If it is
+unreachable, the accesspoint will be marked stale.
+--
+The provision server will update a list of access points considered up or
+booting to the tunnel manager.
+--
+The tunnel manager will look if any tunnel info is not updated for 8 minutes
+and delete the tunnel.
+--
+The tunnel manager will look if any tunnel info has changed endpoints. If so:
+the tunnel will be deleted and created.
+--
+The tunnel manager will look if there are any new tunnel endpoints. It will
+create these tunnels.
+
+
+---
+The hostapd configuration cgi script contains configuration to point to a
+radius accounting server. It can actually be configured to do anything.
+The database has per oeps-id and radio a wireless configuration:
+1) the channel to be used.
+2) the wireless class to be used.
+The hostapd cgi script uses the class as a key to different configuration
+templates and uses the channel as a parameter.
+
+
+------
+Processes to support the management:
+The radius accounting can is used to measure the amount of clients per ap.
+The dhcp information (ip->mac) combined with the radius information
+(mac->accounting) can be used to reveal ones roaming history and it can
+pinpoint the current ap used.
