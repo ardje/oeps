@@ -1,11 +1,37 @@
+For descriptions sake:
+marvel is the name of the production host, but also the name of the branch!
+dev is the name of the development/staging host
+
+The setup is this:
+
+<github> <--master--> <dev> ---master--><marvel>
+                            <--marvel--
+
+=============================================
+# Setup production system:
+# create repository, branch repository
+git init
+# You might need to check something in to make the branch work
+git branch marvel
+git checkout marvel
+
+
+=============================================
+# set up dev system:
+git remote add marvel marvel:src/oeps
+
+
+
+=============================================
 # Push to production system
 git push marvel
-# will push master to master@marvel
+# will push master to master@marvel, while branch marvel is checked out
 # on marvel:
 git diff master # shows diff with current and master
 git merge master # merges changes 
-# Pull changes from marvel
 
+=============================================
+# Pull changes from the marvel branch on marvel into the local master branch
 git pull marvel marvel
 
 # Pulls from marvel, branch marvel
