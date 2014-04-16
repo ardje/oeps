@@ -1,0 +1,75 @@
+:vim:tw=72:
+--------------------
+Short term plans:
+--------------------
+
+Broadcast prevention, groupcast bugs circumvention
+- Make a mac address update api
+  *  Put this on the router to insert static mac entries.
+     We can also put timers on the entries that are twice the time of the dhcp
+     lease and let the dhcp refresh the arp entries.
+  *  Alternative:  creating ebtables entries.
+- Finish dhcp parser.
+- run it
+
+--------------------
+
+DMA bugs with ath9k: nbd says try latest trunk
+
+--------------------
+
+Create a third ethernet tunnel:
+Always have a br-wifi, br-swifi and copper seperately bridged to the
+backbone.
+This as a preliminary to dynamic setups.
+At the backbone we can allow traffic between the different tunnels.
+(Like allowing traffic between the copper and swifi part of an accesspoint, to
+let appliances like apple-tv work with local clients.)
+A second step would be to connect the different "ports" connected to
+database generated bridges.
+It would allow for a vpn like l2 connection between to sites.
+
+--------------------
+
+Create a monitor daemon. A lua libpcap interface that assures we can
+easily dump monitor interfaces.
+
+--------------------
+
+Easy  1st line support web interface
+- who are you
+- where are you
+- type this in your browser ...
+
+--------------------
+
+Easy 2nd line support runin automation:
+- An accesspoint dedicated to run-in access points (eventually any access point
+  could be used)
+- Web interface to control that access-point
+
+--------------------
+
+Tunnel manager *design*:
+No code at all for now, just a design to
+- create bridges
+- create filters (ebtables+bridges)
+- modular so one can choose between bridge and openvswitch
+- interaction/events with other oeps systems
+- *SECURITY!1!11!*: who can create what
+
+--------------------
+
+Wireless security *design*:
+- authentication? How? It should be easy for low IQ persons
+  - device authentication (we've seen that device before/that device has
+    strongly authenticated: 802.1X or WPA2 individual PSK)
+  - device ownership authentication (we know who owns the device)
+- authorization:
+  - based on locality: where are you? get info from the radius servers
+  - based on authentication trust level
+
+--------------------
+
+Research vxlan as tunnel mechanism for oeps-lite.
+

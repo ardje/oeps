@@ -1,0 +1,36 @@
+Authentication and authorization are 2 seperate items.
+Being identified (authentication) doesn't give you the right (authorization).
+Authorization usually implies some sort of authentication, or at least a form
+of identification, even if identified as anonymous.
+A lot of people also consider themselves the subject of authentication. A
+network really doesn't care about them, because he can't see, hear or talk to
+them. A network only sees a device.
+A network can authenticate a device with a certainty between 90% and 99.99%. (I
+just came up with that number, there is no science behind it.), but with a
+trust level from 0.001% to 99%.
+If you have an open wireless network, you can use the mac-address to identify
+a device. There is a very high probability (close to 100%) that this
+mac-address at that moment uniquely identifies that device.
+But it's so very easy to change the mac-address of a wireless device to match
+some other device's address. My experience with network device driver writing
+is that it is usually much easier to let the user decide the mac-address, than
+to write that driver part that pulls it somewhere out of the "hardware".
+This makes the trust level of that identification close to 0%.
+
+Is it important?
+Usually you have several steps of authentication and authorization to get to
+things other shouldn't be able to get to.
+For instance: you get onto the open network, and log into your companies
+website. What happens is your device is identified on the network with a trust
+level of 0. And then you log into your companies website. You get authenticated
+by the website with a very high trust level.
+So no, we don't need a trust level of 100% for the device in this case.
+But what about the website? Can it withstand anonymous devices connecting to
+the open network and poking at it?
+
+Eventually this monologue must end with:
+- prevent man-in-the-middle by dissallowing station-to-station traffic.
+- "locality" based authorization
+- strong device authentication
+- coupling devices to users
+- authorization based on users and device type

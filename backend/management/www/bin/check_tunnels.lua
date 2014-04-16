@@ -1,8 +1,6 @@
 #!/usr/bin/lua
-
 -- ElCheapo mysql interface
 require "luasql.mysql"
-
 
 local c=require("oeps.config")
 local co=c.getconfig()
@@ -18,7 +16,7 @@ select name,state from ap where state != "UP" and adminstate = "PRODUCTION" and 
 row=res:fetch({},"a")
 while row
 do
-	exitcode=1
+	exitcode=1 -- just let it warn on accesspoints that are down
 	message=message .. " " .. row.name .. ":" ..row.state
 	status="CRITICAL:"
 	row=res:fetch({},"a")
@@ -28,5 +26,5 @@ end
 res:close()
 dbh:close()
 dbi:close()
-print(status .. message)
+io.write(status .. message)
 os.exit(exitcode)
